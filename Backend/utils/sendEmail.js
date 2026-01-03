@@ -1,28 +1,27 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST, // smtp.resend.com
-  port: process.env.EMAIL_PORT, // 465
-  secure: true,                // Required for port 465
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
   auth: {
-    user: process.env.EMAIL_USER, // 'resend'
-    pass: process.env.EMAIL_PASS, // Your API key starting with re_
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
 export const sendEmail = async ({ to, subject, html, attachments = [] }) => {
   try {
     await transporter.sendMail({
-      // While in testing/onboarding mode, you MUST use this sender:
-      from: "onboarding@resend.dev",
-      to,
+      // IMPORTANT: This MUST match the sender email you verified in Step 1
+      from: `"RideShare" abhishek9852815692@gmail.com`,
+      to: Array.isArray(to) ? to.join(", ") : to,
       subject,
       html,
       attachments,
     });
-    console.log("Email sent successfully via Resend");
+    console.log("Email successfully sent via Brevo!");
   } catch (error) {
-    console.error("Resend SMTP Error:", error);
+    console.error("Brevo SMTP Error:", error);
     throw error;
   }
 };
