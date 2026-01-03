@@ -27,7 +27,7 @@ const app = express();
 // Change this:
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:8080", // Use Env Var
+    origin: process.env.FRONTEND_URL, // Use Env Var
     credentials: true,
   })
 );
@@ -49,7 +49,7 @@ const server = http.createServer(app);
 // And update the Socket.io origin as well:
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:8080',
+    origin: process.env.FRONTEND_URL ,
     methods: ['GET', 'POST'],
     credentials: true
   },
