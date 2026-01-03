@@ -1,63 +1,31 @@
-import axios from "axios";
+import { Resend } from "resend";
 
-// helper function (filters bad emails)
-const formatEmails = (to) => {
-  const emails = Array.isArray(to) ? to : [to];
-
-  return emails
-    .filter(
-      (email) =>
-        typeof email === "string" &&
-        email.includes("@") &&
-        email.includes(".")
-    )
-    .map((email) => ({ email }));
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendEmail = async ({ to, subject, html, attachments = [] }) => {
   try {
-    const formattedTo = formatEmails(to);
+    const recipients = Array.isArray(to) ? to : [to];
 
-    // safety check
-    if (formattedTo.length === 0) {
-      console.log("❌ No valid email found, email not sent");
-      return;
-    }
-
-    const emailPayload = {
-      sender: {
-        name: "RideShare",
-        email: "abhishek9852815692@gmail.com", // verified in Brevo
-      },
-      to: formattedTo,
+    const emailData = {
+      from: "RideShare <onboarding@resend.dev>", // MUST use this on free tier
+      to: recipients,
       subject,
-      htmlContent: html,
+      html,
     };
 
-    // Only add attachments if there are any
+    // Add attachments if provided
     if (attachments.length > 0) {
-      emailPayload.attachments = attachments.map((file) => ({
-        content: file.content.toString("base64"),
-        name: file.filename,
+      emailData.attachments = attachments.map((file) => ({
+        filename: file.filename,
+        content: file.content,
       }));
     }
 
-    await axios.post(
-      "https://api.brevo.com/v3/smtp/email",
-      emailPayload,
-      {
-        headers: {
-          "api-key": process.env.BREVO_API_KEY,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    console.log("✅ Email sent successfully");
+    const data = await resend.emails.send(emailData);
+    console.log("✅ Email sent successfully:", data.id);
+    return data;
   } catch (error) {
-    console.error(
-      "❌ Brevo API Error:",
-      error.response?.data || error.message
-    );
+    console.error("❌ Resend Error:", error);
+    throw error;
   }
 };
