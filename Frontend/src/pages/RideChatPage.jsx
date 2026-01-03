@@ -8,7 +8,7 @@ import { ArrowLeft, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/lib/api.js';
 
-const SOCKET_URL = import.meta.env.VITE_APP_SOCKET_URL || 'http://localhost:5001';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001';
 
 const RideChatPage = () => {
   const { rideId } = useParams();
@@ -39,7 +39,11 @@ const RideChatPage = () => {
     if (user) {
       fetchHistory(); 
 
-      const newSocket = io(SOCKET_URL);
+     // CHANGE: Pass options to handle CORS and production protocols
+      const newSocket = io(SOCKET_URL, {
+        withCredentials: true,
+        transports: ["websocket", "polling"], // Ensures connection stability on Render
+      });
       setSocket(newSocket);
       
       // --- UPDATED: Send userId on join ---

@@ -1,15 +1,12 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false,
+  service: 'gmail', // Use the 'service' shorthand for better reliability
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    pass: process.env.EMAIL_PASS, // This MUST be a 16-character Google App Password
   },
 });
-
 export const sendEmail = async ({ to, subject, html, attachments = [] }) => {
   await transporter.sendMail({
     from: `"RideShare" <${process.env.EMAIL_USER}>`,
