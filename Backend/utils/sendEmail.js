@@ -24,21 +24,27 @@ export const sendEmail = async ({ to, subject, html, attachments = [] }) => {
       return;
     }
 
+    const emailPayload = {
+      sender: {
+        name: "RideShare",
+        email: "abhishek9852815692@gmail.com", // verified in Brevo
+      },
+      to: formattedTo,
+      subject,
+      htmlContent: html,
+    };
+
+    // Only add attachments if there are any
+    if (attachments.length > 0) {
+      emailPayload.attachments = attachments.map((file) => ({
+        content: file.content.toString("base64"),
+        name: file.filename,
+      }));
+    }
+
     await axios.post(
       "https://api.brevo.com/v3/smtp/email",
-      {
-        sender: {
-          name: "RideShare",
-          email: "abhishek9852815692@gmail.com", // verified in Brevo
-        },
-        to: formattedTo,
-        subject,
-        htmlContent: html,
-        attachment: attachments.map((file) => ({
-          content: file.content.toString("base64"),
-          name: file.filename,
-        })),
-      },
+      emailPayload,
       {
         headers: {
           "api-key": process.env.BREVO_API_KEY,
