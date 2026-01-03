@@ -24,9 +24,10 @@ connectDB();
 
 const app = express();
 // app.use(cors()); 
+// Change this:
 app.use(
   cors({
-    origin: "http://localhost:8080",
+    origin: process.env.FRONTEND_URL || "http://localhost:8080", // Use Env Var
     credentials: true,
   })
 );
@@ -45,10 +46,12 @@ app.use("/api/payment", paymentRoutes);
 
 // --- Socket.io Setup ---
 const server = http.createServer(app);
+// And update the Socket.io origin as well:
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || 'http://localhost:8080',
     methods: ['GET', 'POST'],
+    credentials: true
   },
 });
 
