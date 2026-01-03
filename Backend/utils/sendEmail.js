@@ -1,28 +1,38 @@
-import nodemailer from "nodemailer";
-
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST, // smtp-relay.brevo.com
-  port: Number(process.env.EMAIL_PORT), // 587
-  secure: false, // MUST be false for 587
-  auth: {
-    user: process.env.EMAIL_USER, // MUST be "apikey"
-    pass: process.env.EMAIL_PASS, // Brevo SMTP key
-  },
-});
+import axios from "axios";
 
 export const sendEmail = async ({ to, subject, html, attachments = [] }) => {
   try {
-    await transporter.sendMail({
-      from: `"RideShare" <abhishek9852815692@gmail.com>`, // verified sender
-      to: Array.isArray(to) ? to.join(", ") : to,
-      subject,
-      html,
-      attachments,
-    });
+    await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "RideShare",
+          email: "abhishek9852815692@gmail.com", // MUST be verified in Brevo
+        },
+        to: Array.isArray(to)
+          ? to.map((email) => ({ email }))
+          : [{ email: to }],
+        subject,
+        htmlContent: html,
+        attachment: attachments.map((file) => ({
+          content: file.content.toString("base64"),
+          name: file.filename,
+        })),
+      },
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    console.log("✅ Email successfully sent via Brevo SMTP");
+    console.log("✅ Email sent via Brevo API");
   } catch (error) {
-    console.error("❌ Brevo SMTP Error:", error);
+    console.error(
+      "❌ Brevo API Error:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
